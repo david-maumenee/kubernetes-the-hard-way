@@ -7,7 +7,7 @@ In this lab you will bootstrap three Kubernetes worker nodes. The following comp
 The commands in this lab must be run on each worker instance: `worker-0`, `worker-1`, and `worker-2`. Login to each worker instance using the `gcloud` command. Example:
 
 ```
-gcloud compute ssh worker-0
+vagrant ssh worker-0
 ```
 
 ### Running commands in parallel with tmux
@@ -69,11 +69,14 @@ Install the worker binaries:
 
 ### Configure CNI Networking
 
-Retrieve the Pod CIDR range for the current compute instance:
-
+Sur worker-0
 ```
-POD_CIDR=$(curl -s -H "Metadata-Flavor: Google" \
-  http://metadata.google.internal/computeMetadata/v1/instance/attributes/pod-cidr)
+POD_CIDR=10.200.0.0/24
+```
+
+Sur worker-1
+```
+POD_CIDR=10.200.1.0/24
 ```
 
 Create the `bridge` network configuration file:
@@ -194,7 +197,7 @@ clusterDomain: "cluster.local"
 clusterDNS:
   - "10.32.0.10"
 podCIDR: "${POD_CIDR}"
-resolvConf: "/run/systemd/resolve/resolv.conf"
+resolvConf: "/run/resolvconf/resolv.conf"
 runtimeRequestTimeout: "15m"
 tlsCertFile: "/var/lib/kubelet/${HOSTNAME}.pem"
 tlsPrivateKeyFile: "/var/lib/kubelet/${HOSTNAME}-key.pem"
@@ -202,6 +205,13 @@ EOF
 ```
 
 > The `resolvConf` configuration is used to avoid loops when using CoreDNS for service discovery on systems running `systemd-resolved`. 
+
+On ubuntu 16 https://github.com/ivanfioravanti/kubernetes-the-hard-way-on-azure/issues/30
+
+```
+sudo ln -s /run/resolvconf/ /run/systemd/resolve
+```
+
 
 Create the `kubelet.service` systemd unit file:
 
@@ -288,7 +298,7 @@ EOF
 List the registered Kubernetes nodes:
 
 ```
-gcloud compute ssh controller-0 \
+vagrant ssh controller-0 \
   --command "kubectl get nodes --kubeconfig admin.kubeconfig"
 ```
 

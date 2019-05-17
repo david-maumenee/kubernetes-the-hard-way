@@ -8,14 +8,12 @@ In this section you will generate kubeconfig files for the `controller manager`,
 
 ### Kubernetes Public IP Address
 
-Each kubeconfig requires a Kubernetes API Server to connect to. To support high availability the IP address assigned to the external load balancer fronting the Kubernetes API Servers will be used.
+Each kubeconfig requires a Kubernetes API Server to connect to. NoLB use the IP of controller-0
 
 Retrieve the `kubernetes-the-hard-way` static IP address:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
-  --region $(gcloud config get-value compute/region) \
-  --format 'value(address)')
+KUBERNETES_PUBLIC_ADDRESS=192.169.33.10
 ```
 
 ### The kubelet Kubernetes Configuration File
@@ -196,17 +194,19 @@ admin.kubeconfig
 Copy the appropriate `kubelet` and `kube-proxy` kubeconfig files to each worker instance:
 
 ```
-for instance in worker-0 worker-1 worker-2; do
-  gcloud compute scp ${instance}.kubeconfig kube-proxy.kubeconfig ${instance}:~/
-done
+
+cp /vagrant/cert/$(hostname).kubeconfig ~/
+cp /vagrant/cert/kube-proxy.kubeconfig ~/
+
 ```
 
 Copy the appropriate `kube-controller-manager` and `kube-scheduler` kubeconfig files to each controller instance:
 
 ```
-for instance in controller-0 controller-1 controller-2; do
-  gcloud compute scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/
-done
+cp /vagrant/cert/admin.kubeconfig ~/
+cp /vagrant/cert/kube-controller-manager.kubeconfig ~/
+cp /vagrant/cert/kube-scheduler.kubeconfig ~/
+
 ```
 
 Next: [Generating the Data Encryption Config and Key](06-data-encryption-keys.md)

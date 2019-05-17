@@ -72,6 +72,16 @@ kubectl exec -ti $POD_NAME -- nslookup kubernetes
 
 ```
 Server:    10.32.0.10
+Address 1: 10.32.0.10
+
+nslookup: can't resolve 'kubernetes'
+command terminated with exit code 1
+```
+
+> expected output
+
+```
+Server:    10.32.0.10
 Address 1: 10.32.0.10 kube-dns.kube-system.svc.cluster.local
 
 Name:      kubernetes
